@@ -640,7 +640,7 @@
           </div>
           <div class="terms-grid">
             ${!approvedTerms.length
-              ? '<div class="empty" style="width:100%"><p>Aucun terme pour l'instant</p></div>'
+              ? '<div class="empty" style="width:100%"><p>Aucun terme pour le moment</p></div>'
               : approvedTerms.map(t => `
                 <span class="term-tag ${t.term.includes(' + ') ? 'compound' : ''}">
                   ${esc(t.term)}
