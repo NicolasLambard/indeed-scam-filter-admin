@@ -3,433 +3,490 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ISF Admin — Modération</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <title>ISF Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #08090d;
-      --surface: #0f1117;
-      --surface2: #161922;
-      --border: #1e2230;
-      --text: #e2e5ed;
-      --text2: #7a8099;
-      --accent: #6366f1;
-      --accent-dim: rgba(99,102,241,0.12);
+      --bg: #0a0a0c;
+      --surface: rgba(22, 22, 26, 0.82);
+      --surface2: rgba(255,255,255,0.02);
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.04);
+      --text: #e4e4e7;
+      --text2: #52525b;
+      --text3: #3f3f46;
+      --accent: #c8ff00;
+      --accent-dim: rgba(200,255,0,0.06);
+      --accent-border: rgba(200,255,0,0.15);
       --green: #22c55e;
-      --green-dim: rgba(34,197,94,0.12);
+      --green-dim: rgba(34,197,94,0.08);
       --red: #ef4444;
-      --red-dim: rgba(239,68,68,0.12);
-      --amber: #f59e0b;
-      --amber-dim: rgba(245,158,11,0.12);
-      --radius: 10px;
+      --red-dim: rgba(239,68,68,0.08);
+      --amber: #eab308;
+      --amber-dim: rgba(234,179,8,0.08);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
+      font-family: "Inter", system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
-      font-family: 'Outfit', system-ui, sans-serif;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    /* ===== HEADER ===== */
-    .topbar {
-      background: var(--surface);
+    .app {
+      display: flex;
+      height: 100vh;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 200px;
+      background: rgba(18, 18, 22, 0.5);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 16px 0;
+      flex-shrink: 0;
+    }
+    .sidebar-brand {
+      padding: 0 16px 16px;
       border-bottom: 1px solid var(--border);
-      padding: 0 32px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      margin-bottom: 12px;
     }
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .topbar-logo {
-      font-size: 22px;
-      filter: drop-shadow(0 0 8px rgba(99,102,241,0.3));
-    }
-    .topbar h1 {
-      font-size: 16px;
+    .sidebar-brand h1 {
+      font-size: 13px;
       font-weight: 700;
+      letter-spacing: -0.3px;
     }
-    .topbar h1 span {
-      color: var(--accent);
-    }
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .config-btn {
-      background: var(--surface2);
-      border: 1px solid var(--border);
+    .sidebar-brand h1 span { color: var(--accent); }
+    .sidebar-brand p {
+      font-size: 10px;
       color: var(--text2);
-      padding: 7px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.15s;
+      margin-top: 2px;
     }
-    .config-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    /* ===== CONFIG MODAL ===== */
-    .config-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(4px);
-      z-index: 200;
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-    .config-overlay.open { display: flex; }
-    .config-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px;
-      width: 440px;
-      max-width: 90vw;
-    }
-    .config-box h2 {
-      font-size: 18px;
-      margin-bottom: 18px;
-    }
-    .config-box label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text2);
-      margin-bottom: 6px;
-      margin-top: 14px;
-    }
-    .config-box input {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: var(--text);
-      font-size: 13px;
-      font-family: 'JetBrains Mono', monospace;
-      outline: none;
-    }
-    .config-box input:focus { border-color: var(--accent); }
-    .config-actions {
+    .sidebar-menu {
       display: flex;
-      gap: 8px;
-      margin-top: 20px;
-      justify-content: flex-end;
-    }
-
-    /* ===== STATS ===== */
-    .stats-row {
-      display: flex;
-      gap: 16px;
-      padding: 24px 32px;
-    }
-    .stat-card {
+      flex-direction: column;
+      gap: 1px;
+      padding: 0 8px;
       flex: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px 20px;
     }
-    .stat-card .val {
-      font-size: 32px;
-      font-weight: 800;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .stat-card .label {
-      font-size: 11px;
-      color: var(--text2);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-top: 4px;
-    }
-    .stat-card.pending .val { color: var(--amber); }
-    .stat-card.approved .val { color: var(--green); }
-    .stat-card.rejected .val { color: var(--red); }
-    .stat-card.total .val { color: var(--accent); }
-
-    /* ===== TABS ===== */
-    .tabs {
-      padding: 0 32px;
+    .menu-item {
       display: flex;
-      gap: 4px;
-      border-bottom: 1px solid var(--border);
-    }
-    .tab {
-      padding: 10px 20px;
-      font-size: 13px;
-      font-weight: 600;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border: none;
+      background: transparent;
       color: var(--text2);
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 6px;
       cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all 0.15s;
-      background: none;
-      border-top: none;
-      border-left: none;
-      border-right: none;
-      font-family: inherit;
+      transition: all 0.2s;
+      font-family: "Inter", sans-serif;
+      text-align: left;
+      border-left: 2px solid transparent;
     }
-    .tab:hover { color: var(--text); }
-    .tab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
-    .tab .badge {
+    .menu-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .menu-item:hover { color: #a1a1aa; background: rgba(255,255,255,0.02); }
+    .menu-item.active { color: #fff; background: rgba(200,255,0,0.03); border-left-color: var(--accent); }
+    .menu-item .badge {
+      margin-left: auto;
       background: var(--amber-dim);
       color: var(--amber);
       font-size: 10px;
       font-weight: 700;
-      padding: 2px 7px;
+      padding: 1px 7px;
       border-radius: 10px;
-      margin-left: 6px;
-      font-family: 'JetBrains Mono', monospace;
     }
 
+    /* ===== CONTENT ===== */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 32px;
+    }
+    .content::-webkit-scrollbar { width: 3px; }
+    .content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 3px; }
+
+    .tab { display: none; animation: up 0.2s ease; }
+    .tab.active { display: block; }
+    @keyframes up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .section-label {
+      font-size: 11px;
+      color: var(--text2);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+
+    /* ===== STATS ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-box {
+      padding: 16px 18px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      transition: border-color 0.2s;
+    }
+    .stat-box:hover { border-color: var(--accent-border); }
+    .stat-box .val {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+    .stat-box .lbl {
+      font-size: 10px;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+    .stat-box.s-pending .val { color: var(--amber); }
+    .stat-box.s-approved .val { color: var(--green); }
+    .stat-box.s-rejected .val { color: var(--red); }
+    .stat-box.s-total .val { color: var(--accent); }
+
     /* ===== TABLE ===== */
-    .table-wrap {
-      padding: 20px 32px 40px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    table { width: 100%; border-collapse: collapse; }
     thead th {
       text-align: left;
       font-size: 10px;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: var(--text2);
+      letter-spacing: 0.5px;
+      color: var(--text3);
       padding: 10px 14px;
       border-bottom: 1px solid var(--border);
     }
     tbody tr {
-      border-bottom: 1px solid var(--border);
-      transition: background 0.1s;
+      border-bottom: 1px solid var(--border2);
+      transition: background 0.15s;
     }
-    tbody tr:hover { background: var(--surface); }
+    tbody tr:hover { background: rgba(255,255,255,0.015); }
     tbody td {
-      padding: 14px;
-      font-size: 13px;
+      padding: 12px 14px;
+      font-size: 12px;
       vertical-align: middle;
     }
-    .term-cell {
-      font-weight: 700;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-    }
-    .company-cell {
-      color: var(--text2);
-      font-size: 12px;
-    }
-    .count-cell {
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 700;
-      color: var(--amber);
-    }
-    .date-cell {
-      color: var(--text2);
-      font-size: 12px;
-    }
+    .term-cell { font-weight: 700; font-size: 13px; }
+    .company-cell { color: var(--text2); font-size: 11px; }
+    .count-cell { font-weight: 700; color: var(--amber); }
+    .date-cell { color: var(--text3); font-size: 11px; }
+    .actions-cell { display: flex; gap: 6px; }
 
-    /* Buttons */
+    /* ===== BUTTONS ===== */
     .btn {
-      padding: 6px 14px;
+      padding: 7px 16px;
       border-radius: 6px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       cursor: pointer;
       border: none;
-      font-family: inherit;
+      font-family: "Inter", sans-serif;
       transition: all 0.15s;
     }
     .btn-approve {
       background: var(--green-dim);
       color: var(--green);
+      border: 1px solid rgba(34,197,94,0.15);
     }
     .btn-approve:hover { background: var(--green); color: #fff; }
     .btn-reject {
       background: var(--red-dim);
       color: var(--red);
+      border: 1px solid rgba(239,68,68,0.15);
     }
     .btn-reject:hover { background: var(--red); color: #fff; }
     .btn-primary {
-      background: var(--accent);
-      color: #fff;
+      background: #fff;
+      color: #000;
     }
-    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,255,255,0.08); }
     .btn-ghost {
-      background: var(--surface2);
+      background: transparent;
       color: var(--text2);
       border: 1px solid var(--border);
     }
-    .btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.12); color: #a1a1aa; }
 
-    .actions-cell {
-      display: flex;
-      gap: 6px;
-    }
-
-    /* Status badges */
+    /* ===== STATUS BADGES ===== */
     .status-badge {
       display: inline-block;
       padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 11px;
+      border-radius: 4px;
+      font-size: 10px;
       font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
     .status-badge.approved { background: var(--green-dim); color: var(--green); }
     .status-badge.rejected { background: var(--red-dim); color: var(--red); }
 
-    /* Empty state */
+    /* ===== EMPTY STATE ===== */
     .empty {
       text-align: center;
-      padding: 60px 20px;
-      color: var(--text2);
+      padding: 48px 20px;
+      color: var(--text3);
     }
-    .empty .icon { font-size: 40px; margin-bottom: 12px; }
-    .empty p { font-size: 14px; }
+    .empty .icon { font-size: 32px; margin-bottom: 10px; opacity: 0.5; }
+    .empty p { font-size: 12px; font-weight: 500; }
 
-    /* Loading */
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: var(--text2);
-      font-size: 14px;
+    /* ===== TERMS ===== */
+    .add-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
     }
+    .add-row input {
+      flex: 1;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: "Inter", sans-serif;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .add-row input:focus {
+      border-color: var(--accent-border);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    .add-row input::placeholder { color: var(--text3); }
 
-    /* Approved terms list */
     .terms-grid {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      padding: 20px 32px;
     }
     .term-tag {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 5px 10px 5px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 5px 8px 5px 12px;
       font-size: 12px;
-      font-family: 'JetBrains Mono', monospace;
       font-weight: 600;
+      transition: border-color 0.2s;
+    }
+    .term-tag:hover { border-color: rgba(255,255,255,0.08); }
+    .term-tag.compound {
+      border-color: var(--accent-border);
+      background: var(--accent-dim);
     }
     .term-tag .del {
       cursor: pointer;
       color: var(--red);
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
-      padding: 0 4px;
-      border-radius: 50%;
-      transition: background 0.15s;
+      padding: 0 3px;
       background: none;
       border: none;
       font-family: inherit;
+      transition: opacity 0.15s;
+      opacity: 0.6;
     }
-    .term-tag .del:hover { background: var(--red-dim); }
+    .term-tag .del:hover { opacity: 1; }
 
-    /* Add term manually */
-    .add-row {
-      display: flex;
-      gap: 8px;
-      padding: 0 32px 20px;
+    /* ===== CONFIG MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
     }
-    .add-row input {
-      flex: 1;
-      background: var(--surface);
+    .modal-overlay.open { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal-box {
+      background: rgba(22, 22, 26, 0.92);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
+      border-radius: 14px;
+      padding: 24px;
+      width: 440px;
+      max-width: 90vw;
+    }
+    .modal-box h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+    .modal-box label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+      margin-top: 14px;
+    }
+    .modal-box input {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
       color: var(--text);
       font-size: 13px;
-      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-family: "Inter", sans-serif;
       outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .add-row input:focus { border-color: var(--accent); }
-    .add-row input::placeholder { color: var(--text2); }
+    .modal-box input:focus {
+      border-color: var(--accent-border);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+      justify-content: flex-end;
+    }
+    .config-error {
+      background: var(--red-dim);
+      color: var(--red);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+      display: none;
+    }
+    .config-success {
+      background: var(--green-dim);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+      display: none;
+    }
+    .spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid transparent;
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* ===== ACCESS DENIED ===== */
+    .access-denied {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 150;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
     }
-    tbody tr { animation: fadeIn 0.2s ease both; }
+    .access-denied h2 { font-size: 18px; font-weight: 700; }
+    .access-denied p { color: var(--text2); font-size: 12px; max-width: 360px; text-align: center; line-height: 1.5; }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text3);
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Config overlay -->
-  <div class="config-overlay" id="configOverlay">
-    <div class="config-box">
-      <h2>⚙️ Configuration Supabase</h2>
+  <!-- Config modal -->
+  <div class="modal-overlay" id="configOverlay">
+    <div class="modal-box">
+      <h2>Configuration</h2>
       <label>URL du projet</label>
       <input type="text" id="cfgUrl" placeholder="https://xxxxx.supabase.co">
-      <label>Service Role Key (admin, secret)</label>
+      <label>Service Role Key</label>
       <input type="password" id="cfgKey" placeholder="eyJhbGciOiJIUzI1NiIs...">
-      <p style="font-size:11px;color:var(--text2);margin-top:12px;">
-        ⚠️ La service_role key a un accès total. Ne la partage jamais. Elle est stockée uniquement en localStorage sur ta machine.
-      </p>
-      <div class="config-actions">
+      <p style="font-size:10px;color:var(--text3);margin-top:10px;">Stockée uniquement en localStorage sur ta machine.</p>
+      <div class="config-error" id="cfgError"></div>
+      <div class="config-success" id="cfgSuccess"></div>
+      <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeConfig()">Annuler</button>
-        <button class="btn btn-primary" onclick="saveConfig()">Enregistrer</button>
+        <button class="btn btn-primary" id="cfgSaveBtn" onclick="saveConfig()">Enregistrer</button>
       </div>
     </div>
   </div>
 
-  <!-- Topbar -->
-  <div class="topbar">
-    <div class="topbar-left">
-      <div class="topbar-logo">🛡️</div>
-      <h1>Indeed Scam Filter — <span>Admin</span></h1>
-    </div>
-    <div class="topbar-right">
-      <button class="config-btn" onclick="openConfig()">⚙️ Config</button>
-      <button class="config-btn" onclick="loadAll()">🔄 Refresh</button>
-    </div>
+  <!-- Access denied -->
+  <div class="access-denied" id="accessDenied" style="display:none;">
+    <h2>Acces refuse</h2>
+    <p>Identifiants Supabase invalides ou manquants.</p>
+    <button class="btn btn-primary" onclick="openConfig()" style="margin-top:4px;padding:10px 24px;">Configurer</button>
   </div>
 
-  <!-- Stats -->
-  <div class="stats-row" id="statsRow">
-    <div class="stat-card pending"><div class="val" id="sPending">–</div><div class="label">En attente</div></div>
-    <div class="stat-card approved"><div class="val" id="sApproved">–</div><div class="label">Approuvés</div></div>
-    <div class="stat-card rejected"><div class="val" id="sRejected">–</div><div class="label">Rejetés</div></div>
-    <div class="stat-card total"><div class="val" id="sTotal">–</div><div class="label">Termes actifs</div></div>
-  </div>
+  <!-- App -->
+  <div class="app" id="mainApp">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <h1>ISF <span>Admin</span></h1>
+        <p>Moderation panel</p>
+      </div>
+      <nav class="sidebar-menu">
+        <button class="menu-item active" data-tab="pending">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          En attente <span class="badge" id="pendingBadge">0</span>
+        </button>
+        <button class="menu-item" data-tab="history">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Historique
+        </button>
+        <button class="menu-item" data-tab="terms">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Termes actifs
+        </button>
+      </nav>
+      <button class="menu-item" style="margin:0 8px;color:var(--text3);" onclick="openConfig()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Config
+      </button>
+    </aside>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab active" data-tab="pending">
-      🕐 En attente <span class="badge" id="pendingBadge">0</span>
-    </button>
-    <button class="tab" data-tab="history">📋 Historique</button>
-    <button class="tab" data-tab="terms">🏷️ Termes actifs</button>
-  </div>
+    <main class="content">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-box s-pending"><div class="val" id="sPending">-</div><div class="lbl">En attente</div></div>
+        <div class="stat-box s-approved"><div class="val" id="sApproved">-</div><div class="lbl">Approuves</div></div>
+        <div class="stat-box s-rejected"><div class="val" id="sRejected">-</div><div class="lbl">Rejetes</div></div>
+        <div class="stat-box s-total"><div class="val" id="sTotal">-</div><div class="lbl">Termes actifs</div></div>
+      </div>
 
-  <!-- Content -->
-  <div id="content"></div>
+      <div id="tabContent"></div>
+    </main>
+  </div>
 
   <script>
-    // ===== CONFIG =====
     let SUPABASE_URL = localStorage.getItem("isf_url") || "";
     let SERVICE_KEY = localStorage.getItem("isf_key") || "";
 
@@ -441,21 +498,42 @@
     function closeConfig() {
       document.getElementById("configOverlay").classList.remove("open");
     }
-    function saveConfig() {
-      SUPABASE_URL = document.getElementById("cfgUrl").value.trim().replace(/\/$/, "");
-      SERVICE_KEY = document.getElementById("cfgKey").value.trim();
-      localStorage.setItem("isf_url", SUPABASE_URL);
-      localStorage.setItem("isf_key", SERVICE_KEY);
-      closeConfig();
-      loadAll();
+
+    async function saveConfig() {
+      const url = document.getElementById("cfgUrl").value.trim().replace(/\/$/, "");
+      const key = document.getElementById("cfgKey").value.trim();
+      const errEl = document.getElementById("cfgError");
+      const successEl = document.getElementById("cfgSuccess");
+      const saveBtn = document.getElementById("cfgSaveBtn");
+      errEl.style.display = "none";
+      successEl.style.display = "none";
+
+      if (!url || !key) { errEl.textContent = "Champs obligatoires."; errEl.style.display = "block"; return; }
+
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span class="spinner"></span>Verification...';
+
+      try {
+        const res = await fetch(`${url}/rest/v1/admin_stats`, {
+          headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        });
+        if (res.status === 401 || res.status === 403) throw new Error("Cle invalide.");
+        if (!res.ok) throw new Error(`Erreur ${res.status}`);
+        await res.json();
+
+        SUPABASE_URL = url;
+        SERVICE_KEY = key;
+        localStorage.setItem("isf_url", SUPABASE_URL);
+        localStorage.setItem("isf_key", SERVICE_KEY);
+        successEl.textContent = "Connecte.";
+        successEl.style.display = "block";
+        setTimeout(() => { closeConfig(); successEl.style.display = "none"; document.getElementById("accessDenied").style.display = "none"; document.getElementById("mainApp").style.display = "flex"; loadAll(); }, 600);
+      } catch (err) { errEl.textContent = err.message; errEl.style.display = "block"; }
+      finally { saveBtn.disabled = false; saveBtn.textContent = "Enregistrer"; }
     }
 
     function headers() {
-      return {
-        apikey: SERVICE_KEY,
-        Authorization: `Bearer ${SERVICE_KEY}`,
-        "Content-Type": "application/json",
-      };
+      return { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}`, "Content-Type": "application/json" };
     }
 
     async function api(path, opts = {}) {
@@ -464,34 +542,35 @@
         method: opts.method || "GET",
         body: opts.body ? JSON.stringify(opts.body) : undefined,
       });
-      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      if (!res.ok) throw new Error(`${res.status}`);
       if (opts.method === "DELETE" || opts.method === "PATCH") return null;
       return res.json();
     }
 
     async function rpc(fn, params) {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
-        method: "POST",
-        headers: headers(),
-        body: JSON.stringify(params),
+        method: "POST", headers: headers(), body: JSON.stringify(params),
       });
       if (!res.ok) throw new Error(`${res.status}`);
     }
 
-    // ===== STATE =====
     let currentTab = "pending";
     let reports = [];
     let approvedTerms = [];
 
-    // ===== LOAD DATA =====
     async function loadAll() {
-      if (!SUPABASE_URL || !SERVICE_KEY) {
-        openConfig();
-        return;
-      }
+      const denied = document.getElementById("accessDenied");
+      if (!SUPABASE_URL || !SERVICE_KEY) { denied.style.display = "flex"; document.getElementById("mainApp").style.display = "none"; return; }
+
       try {
+        const testRes = await fetch(`${SUPABASE_URL}/rest/v1/admin_stats`, { headers: headers() });
+        if (testRes.status === 401 || testRes.status === 403) { denied.style.display = "flex"; document.getElementById("mainApp").style.display = "none"; return; }
+        if (!testRes.ok) throw new Error(`${testRes.status}`);
+        denied.style.display = "none";
+        document.getElementById("mainApp").style.display = "flex";
+
         const [statsArr, reps, terms] = await Promise.all([
-          api("admin_stats"),
+          testRes.json(),
           api("reports?order=created_at.desc&limit=200"),
           api("approved_terms?order=term.asc"),
         ]);
@@ -505,194 +584,112 @@
 
         reports = reps || [];
         approvedTerms = terms || [];
-
         renderTab();
       } catch (err) {
-        document.getElementById("content").innerHTML = `
-          <div class="empty">
-            <div class="icon">❌</div>
-            <p>Erreur : ${err.message}</p>
-            <p style="font-size:12px;margin-top:8px;color:var(--text2)">Vérifie ta config Supabase</p>
-          </div>`;
+        if (err.message.includes("401") || err.message.includes("403")) { denied.style.display = "flex"; document.getElementById("mainApp").style.display = "none"; return; }
+        document.getElementById("tabContent").innerHTML = `<div class="empty"><div class="icon">x</div><p>Erreur : ${err.message}</p></div>`;
       }
     }
 
-    // ===== RENDER =====
     function renderTab() {
-      const c = document.getElementById("content");
+      const c = document.getElementById("tabContent");
 
       if (currentTab === "pending") {
-        const pending = reports.filter((r) => r.status === "pending");
-
-        // Group by term
+        const pending = reports.filter(r => r.status === "pending");
         const grouped = {};
-        pending.forEach((r) => {
+        pending.forEach(r => {
           const key = r.term.toLowerCase().trim();
-          if (!grouped[key]) {
-            grouped[key] = { term: key, company: r.company_name, reports: [], ids: [] };
-          }
+          if (!grouped[key]) grouped[key] = { term: key, company: r.company_name, reports: [], ids: [] };
           grouped[key].reports.push(r);
           grouped[key].ids.push(r.id);
         });
         const groups = Object.values(grouped).sort((a, b) => b.reports.length - a.reports.length);
 
-        if (groups.length === 0) {
-          c.innerHTML = `<div class="empty"><div class="icon">✅</div><p>Aucun signalement en attente</p></div>`;
+        if (!groups.length) {
+          c.innerHTML = `<div class="empty"><p>Aucun signalement en attente</p></div>`;
           return;
         }
-
-        c.innerHTML = `
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Terme</th>
-                  <th>Entreprise</th>
-                  <th>Signalements</th>
-                  <th>Premier signalement</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${groups.map((g, i) => `
-                  <tr style="animation-delay:${i * 30}ms">
-                    <td class="term-cell">${esc(g.term)}</td>
-                    <td class="company-cell">${esc(g.company || "—")}</td>
-                    <td class="count-cell">${g.reports.length}×</td>
-                    <td class="date-cell">${fmtDate(g.reports[g.reports.length - 1].created_at)}</td>
-                    <td>
-                      <div class="actions-cell">
-                        <button class="btn btn-approve" onclick="approveGroup('${g.ids[0]}')">✓ Approuver</button>
-                        <button class="btn btn-reject" onclick="rejectGroup('${g.ids.join(",")}')">✗ Rejeter</button>
-                      </div>
-                    </td>
-                  </tr>
-                `).join("")}
-              </tbody>
-            </table>
-          </div>`;
+        c.innerHTML = `<table><thead><tr><th>Terme</th><th>Entreprise</th><th>Signalements</th><th>Date</th><th>Actions</th></tr></thead><tbody>${groups.map(g => `
+          <tr>
+            <td class="term-cell">${esc(g.term)}</td>
+            <td class="company-cell">${esc(g.company || "-")}</td>
+            <td class="count-cell">${g.reports.length}x</td>
+            <td class="date-cell">${fmtDate(g.reports[g.reports.length - 1].created_at)}</td>
+            <td><div class="actions-cell">
+              <button class="btn btn-approve" onclick="approveGroup('${g.ids[0]}')">Approuver</button>
+              <button class="btn btn-reject" onclick="rejectGroup('${g.ids.join(",")}')">Rejeter</button>
+            </div></td>
+          </tr>`).join("")}</tbody></table>`;
 
       } else if (currentTab === "history") {
-        const reviewed = reports.filter((r) => r.status !== "pending");
-
-        if (reviewed.length === 0) {
-          c.innerHTML = `<div class="empty"><div class="icon">📋</div><p>Aucun historique</p></div>`;
-          return;
-        }
-
-        c.innerHTML = `
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Terme</th><th>Entreprise</th><th>Status</th><th>Date</th></tr>
-              </thead>
-              <tbody>
-                ${reviewed.slice(0, 100).map((r, i) => `
-                  <tr style="animation-delay:${i * 20}ms">
-                    <td class="term-cell">${esc(r.term)}</td>
-                    <td class="company-cell">${esc(r.company_name || "—")}</td>
-                    <td><span class="status-badge ${r.status}">${r.status === "approved" ? "✓ Approuvé" : "✗ Rejeté"}</span></td>
-                    <td class="date-cell">${fmtDate(r.reviewed_at || r.created_at)}</td>
-                  </tr>
-                `).join("")}
-              </tbody>
-            </table>
-          </div>`;
+        const reviewed = reports.filter(r => r.status !== "pending");
+        if (!reviewed.length) { c.innerHTML = `<div class="empty"><p>Aucun historique</p></div>`; return; }
+        c.innerHTML = `<table><thead><tr><th>Terme</th><th>Entreprise</th><th>Status</th><th>Date</th></tr></thead><tbody>${reviewed.slice(0, 100).map(r => `
+          <tr>
+            <td class="term-cell">${esc(r.term)}</td>
+            <td class="company-cell">${esc(r.company_name || "-")}</td>
+            <td><span class="status-badge ${r.status}">${r.status === "approved" ? "Approuve" : "Rejete"}</span></td>
+            <td class="date-cell">${fmtDate(r.reviewed_at || r.created_at)}</td>
+          </tr>`).join("")}</tbody></table>`;
 
       } else if (currentTab === "terms") {
         c.innerHTML = `
-          <div class="add-row" style="padding-top:20px;">
-            <input type="text" id="manualTerm" placeholder="Ajouter un terme manuellement...">
-            <button class="btn btn-primary" onclick="addManualTerm()">+ Ajouter</button>
+          <div class="add-row">
+            <input type="text" id="manualTerm" placeholder="terme simple ou terme1 + terme2">
+            <button class="btn btn-primary" onclick="addManualTerm()">Ajouter</button>
           </div>
           <div class="terms-grid">
-            ${approvedTerms.length === 0
-              ? '<div class="empty" style="width:100%"><div class="icon">🏷️</div><p>Aucun terme communautaire</p></div>'
-              : approvedTerms.map((t) => `
-                <span class="term-tag">
+            ${!approvedTerms.length
+              ? '<div class="empty" style="width:100%"><p>Aucun terme</p></div>'
+              : approvedTerms.map(t => `
+                <span class="term-tag ${t.term.includes(' + ') ? 'compound' : ''}">
                   ${esc(t.term)}
-                  <button class="del" onclick="deleteTerm('${t.id}', '${esc(t.term)}')">×</button>
-                </span>
-              `).join("")}
+                  <button class="del" onclick="deleteTerm('${t.id}', '${esc(t.term)}')">x</button>
+                </span>`).join("")}
           </div>`;
       }
     }
 
-    // ===== ACTIONS =====
-    async function approveGroup(reportId) {
-      try {
-        await rpc("approve_report", { report_id: reportId });
-        loadAll();
-      } catch (err) {
-        alert("Erreur: " + err.message);
-      }
+    async function approveGroup(id) {
+      try { await rpc("approve_report", { report_id: id }); loadAll(); }
+      catch (err) { alert("Erreur: " + err.message); }
     }
-
-    async function rejectGroup(idsCsv) {
-      try {
-        const ids = idsCsv.split(",");
-        for (const id of ids) {
-          await rpc("reject_report", { report_id: id });
-        }
-        loadAll();
-      } catch (err) {
-        alert("Erreur: " + err.message);
-      }
+    async function rejectGroup(csv) {
+      try { for (const id of csv.split(",")) await rpc("reject_report", { report_id: id }); loadAll(); }
+      catch (err) { alert("Erreur: " + err.message); }
     }
-
     async function deleteTerm(id, term) {
-      if (!confirm(`Supprimer "${term}" de la liste communautaire ?`)) return;
-      try {
-        await fetch(`${SUPABASE_URL}/rest/v1/approved_terms?id=eq.${id}`, {
-          method: "DELETE",
-          headers: headers(),
-        });
-        loadAll();
-      } catch (err) {
-        alert("Erreur: " + err.message);
-      }
+      if (!confirm(`Supprimer "${term}" ?`)) return;
+      try { await fetch(`${SUPABASE_URL}/rest/v1/approved_terms?id=eq.${id}`, { method: "DELETE", headers: headers() }); loadAll(); }
+      catch (err) { alert("Erreur: " + err.message); }
     }
-
     async function addManualTerm() {
       const input = document.getElementById("manualTerm");
       const term = input.value.trim().toLowerCase();
       if (!term) return;
       try {
-        await api("approved_terms", {
-          method: "POST",
-          body: { term, category: "manual" },
-          extraHeaders: { Prefer: "return=minimal" },
-        });
+        await api("approved_terms", { method: "POST", body: { term, category: "manual" }, extraHeaders: { Prefer: "return=minimal" } });
         input.value = "";
         loadAll();
-      } catch (err) {
-        alert("Erreur (doublon ?) : " + err.message);
-      }
+      } catch (err) { alert("Doublon ? " + err.message); }
     }
 
-    // ===== TABS =====
-    document.querySelectorAll(".tab").forEach((t) => {
+    // Tabs
+    document.querySelectorAll(".menu-item[data-tab]").forEach(t => {
       t.addEventListener("click", () => {
-        document.querySelectorAll(".tab").forEach((x) => x.classList.remove("active"));
+        document.querySelectorAll(".menu-item[data-tab]").forEach(x => x.classList.remove("active"));
         t.classList.add("active");
         currentTab = t.dataset.tab;
         renderTab();
       });
     });
 
-    // ===== UTILS =====
-    function esc(s) {
-      const d = document.createElement("div");
-      d.textContent = s;
-      return d.innerHTML;
-    }
+    function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
     function fmtDate(iso) {
-      if (!iso) return "—";
-      const d = new Date(iso);
-      return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+      if (!iso) return "-";
+      return new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
     }
 
-    // ===== INIT =====
     loadAll();
   </script>
 </body>
