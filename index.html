@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ISF Admin</title>
+  <title>PinguuPanel</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -424,12 +424,12 @@
   <!-- Config modal -->
   <div class="modal-overlay" id="configOverlay">
     <div class="modal-box">
-      <h2>Configuration</h2>
+      <h2>Config</h2>
       <label>URL du projet</label>
       <input type="text" id="cfgUrl" placeholder="https://xxxxx.supabase.co">
       <label>Service Role Key</label>
       <input type="password" id="cfgKey" placeholder="eyJhbGciOiJIUzI1NiIs...">
-      <p style="font-size:10px;color:var(--text3);margin-top:10px;">Stockée uniquement en localStorage sur ta machine.</p>
+      <p style="font-size:10px;color:var(--text3);margin-top:10px;">Reste en local sur ta machine, tranquille.</p>
       <div class="config-error" id="cfgError"></div>
       <div class="config-success" id="cfgSuccess"></div>
       <div class="modal-actions">
@@ -441,17 +441,17 @@
 
   <!-- Access denied -->
   <div class="access-denied" id="accessDenied" style="display:none;">
-    <h2>Acces refuse</h2>
-    <p>Identifiants Supabase invalides ou manquants.</p>
-    <button class="btn btn-primary" onclick="openConfig()" style="margin-top:4px;padding:10px 24px;">Configurer</button>
+    <h2>Nope.</h2>
+    <p>Mauvais identifiants ou config manquante.</p>
+    <button class="btn btn-primary" onclick="openConfig()" style="margin-top:4px;padding:10px 24px;">Config</button>
   </div>
 
   <!-- App -->
   <div class="app" id="mainApp">
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <h1>ISF <span>Admin</span></h1>
-        <p>Moderation panel</p>
+        <h1>Pinguu<span>Panel</span></h1>
+        <p>Moderation</p>
       </div>
       <nav class="sidebar-menu">
         <button class="menu-item active" data-tab="pending">
@@ -508,7 +508,7 @@
       errEl.style.display = "none";
       successEl.style.display = "none";
 
-      if (!url || !key) { errEl.textContent = "Champs obligatoires."; errEl.style.display = "block"; return; }
+      if (!url || !key) { errEl.textContent = "Faut remplir les deux."; errEl.style.display = "block"; return; }
 
       saveBtn.disabled = true;
       saveBtn.innerHTML = '<span class="spinner"></span>Verification...';
@@ -517,15 +517,15 @@
         const res = await fetch(`${url}/rest/v1/admin_stats`, {
           headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
         });
-        if (res.status === 401 || res.status === 403) throw new Error("Cle invalide.");
-        if (!res.ok) throw new Error(`Erreur ${res.status}`);
+        if (res.status === 401 || res.status === 403) throw new Error("Cle invalide, verifie.");
+        if (!res.ok) throw new Error(`Ca passe pas (${res.status})`);
         await res.json();
 
         SUPABASE_URL = url;
         SERVICE_KEY = key;
         localStorage.setItem("isf_url", SUPABASE_URL);
         localStorage.setItem("isf_key", SERVICE_KEY);
-        successEl.textContent = "Connecte.";
+        successEl.textContent = "C'est bon.";
         successEl.style.display = "block";
         setTimeout(() => { closeConfig(); successEl.style.display = "none"; document.getElementById("accessDenied").style.display = "none"; document.getElementById("mainApp").style.display = "flex"; loadAll(); }, 600);
       } catch (err) { errEl.textContent = err.message; errEl.style.display = "block"; }
@@ -606,7 +606,7 @@
         const groups = Object.values(grouped).sort((a, b) => b.reports.length - a.reports.length);
 
         if (!groups.length) {
-          c.innerHTML = `<div class="empty"><p>Aucun signalement en attente</p></div>`;
+          c.innerHTML = `<div class="empty"><p>Rien en attente, c'est clean</p></div>`;
           return;
         }
         c.innerHTML = `<table><thead><tr><th>Terme</th><th>Entreprise</th><th>Signalements</th><th>Date</th><th>Actions</th></tr></thead><tbody>${groups.map(g => `
@@ -623,7 +623,7 @@
 
       } else if (currentTab === "history") {
         const reviewed = reports.filter(r => r.status !== "pending");
-        if (!reviewed.length) { c.innerHTML = `<div class="empty"><p>Aucun historique</p></div>`; return; }
+        if (!reviewed.length) { c.innerHTML = `<div class="empty"><p>Pas encore d'historique</p></div>`; return; }
         c.innerHTML = `<table><thead><tr><th>Terme</th><th>Entreprise</th><th>Status</th><th>Date</th></tr></thead><tbody>${reviewed.slice(0, 100).map(r => `
           <tr>
             <td class="term-cell">${esc(r.term)}</td>
@@ -640,7 +640,7 @@
           </div>
           <div class="terms-grid">
             ${!approvedTerms.length
-              ? '<div class="empty" style="width:100%"><p>Aucun terme</p></div>'
+              ? '<div class="empty" style="width:100%"><p>Aucun terme pour l'instant</p></div>'
               : approvedTerms.map(t => `
                 <span class="term-tag ${t.term.includes(' + ') ? 'compound' : ''}">
                   ${esc(t.term)}
