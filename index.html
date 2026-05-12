@@ -543,8 +543,10 @@
         body: opts.body ? JSON.stringify(opts.body) : undefined,
       });
       if (!res.ok) throw new Error(`${res.status}`);
-      if (opts.method === "DELETE" || opts.method === "PATCH") return null;
-      return res.json();
+      if (opts.method === "DELETE" || opts.method === "PATCH" || res.status === 204 || res.headers.get("content-length") === "0") return null;
+      const text = await res.text();
+      if (!text) return null;
+      return JSON.parse(text);
     }
 
     async function rpc(fn, params) {
