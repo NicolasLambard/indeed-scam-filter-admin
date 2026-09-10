@@ -160,6 +160,11 @@
 
     /* ===== TABLE ===== */
     table { width: 100%; border-collapse: collapse; }
+    .msg-cell { white-space: pre-wrap; word-break: break-word; max-width: 480px; line-height: 1.45; }
+    .kind-cell { font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: .3px; }
+    .kind-bug { color: #b4553f; }
+    .kind-idee { color: #5f7a55; }
+    .kind-autre { color: var(--text3); }
     thead th {
       text-align: left;
       font-size: 10px;
@@ -462,6 +467,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           Historique
         </button>
+        <button class="menu-item" data-tab="feedback">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+          Retours <span class="badge" id="feedbackBadge">0</span>
+        </button>
         <button class="menu-item" data-tab="terms">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           Termes actifs
@@ -559,6 +568,10 @@
     let currentTab = "pending";
     let reports = [];
     let approvedTerms = [];
+    let feedback = [];
+    // Faux tant que la table n'a pas ete creee : le panel doit rester
+    // utilisable sur une base ou supabase-feedback.sql n'a pas ete joue.
+    let feedbackDispo = true;
 
     async function loadAll() {
       const denied = document.getElementById("accessDenied");
@@ -571,10 +584,11 @@
         denied.style.display = "none";
         document.getElementById("mainApp").style.display = "flex";
 
-        const [statsArr, reps, terms] = await Promise.all([
+        const [statsArr, reps, terms, retours] = await Promise.all([
           testRes.json(),
           api("reports?order=created_at.desc&limit=200"),
           api("approved_terms?order=term.asc"),
+          api("feedback?order=created_at.desc&limit=200").catch(() => null),
         ]);
 
         const stats = statsArr[0] || {};
@@ -586,6 +600,10 @@
 
         reports = reps || [];
         approvedTerms = terms || [];
+        feedbackDispo = retours !== null;
+        feedback = retours || [];
+        document.getElementById("feedbackBadge").textContent =
+          feedback.filter(f => f.status === "nouveau").length;
         renderTab();
       } catch (err) {
         if (err.message.includes("401") || err.message.includes("403")) { denied.style.display = "flex"; document.getElementById("mainApp").style.display = "none"; return; }
@@ -634,6 +652,29 @@
             <td class="date-cell">${fmtDate(r.reviewed_at || r.created_at)}</td>
           </tr>`).join("")}</tbody></table>`;
 
+      } else if (currentTab === "feedback") {
+        if (!feedbackDispo) {
+          c.innerHTML = `<div class="empty"><p>La table <b>feedback</b> n'existe pas encore.<br>
+            Colle <b>supabase-feedback.sql</b> dans le SQL Editor de Supabase, puis recharge cette page.</p></div>`;
+          return;
+        }
+        if (!feedback.length) { c.innerHTML = `<div class="empty"><p>Aucun retour pour le moment</p></div>`; return; }
+
+        c.innerHTML = `<table><thead><tr><th>Type</th><th>Message</th><th>Contact</th><th>Version</th><th>Date</th><th>Actions</th></tr></thead><tbody>${feedback.map(f => `
+          <tr${f.status === "traite" ? ' style="opacity:.5"' : ""}>
+            <td class="kind-cell kind-${esc(f.kind)}">${esc(f.kind)}</td>
+            <td class="msg-cell">${esc(f.message)}</td>
+            <td class="company-cell">${f.contact ? esc(f.contact) : "-"}</td>
+            <td class="date-cell">${esc(f.version || "-")}</td>
+            <td class="date-cell">${fmtDate(f.created_at)}</td>
+            <td><div class="actions-cell">
+              ${f.status === "traite"
+                ? '<span class="status-badge approved">Traite</span>'
+                : `<button class="btn btn-approve" onclick="marquerRetour('${f.id}', 'traite')">Traite</button>`}
+              <button class="btn btn-reject" onclick="supprimerRetour('${f.id}')">Supprimer</button>
+            </div></td>
+          </tr>`).join("")}</tbody></table>`;
+
       } else if (currentTab === "terms") {
         c.innerHTML = `
           <div class="add-row">
@@ -660,6 +701,25 @@
       try { for (const id of csv.split(",")) await rpc("reject_report", { report_id: id }); loadAll(); }
       catch (err) { alert("Erreur: " + err.message); }
     }
+    async function marquerRetour(id, status) {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/feedback?id=eq.${id}`, {
+          method: "PATCH",
+          headers: { ...headers(), Prefer: "return=minimal" },
+          body: JSON.stringify({ status }),
+        });
+        loadAll();
+      } catch (err) { alert("Erreur: " + err.message); }
+    }
+
+    async function supprimerRetour(id) {
+      if (!confirm("Supprimer ce retour ?")) return;
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/feedback?id=eq.${id}`, { method: "DELETE", headers: headers() });
+        loadAll();
+      } catch (err) { alert("Erreur: " + err.message); }
+    }
+
     async function deleteTerm(id, term) {
       if (!confirm(`Supprimer "${term}" ?`)) return;
       try { await fetch(`${SUPABASE_URL}/rest/v1/approved_terms?id=eq.${id}`, { method: "DELETE", headers: headers() }); loadAll(); }
